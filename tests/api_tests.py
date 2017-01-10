@@ -27,5 +27,14 @@ class TestAPI(unittest.TestCase):
         # Remove the tables and their data from the database
         Base.metadata.drop_all(engine)
 
+    def test_get_empty_posts(self):
+        response = self.client.get("/api/posts")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "application/json")
+
+        data = json.loads(response.data.decode("ascii"))
+        self.assertEqual(data, [])
+
 if __name__ == "__main__":
     unittest.main()
