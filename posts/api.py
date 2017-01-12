@@ -11,5 +11,8 @@ from .database import session
 @app.route("/api/posts", methods=["GET"])
 def posts_get():
     """Get a list of posts"""
-    data = json.dumps([])
+    posts = session.query(models.Post).order_by(models.Post.id)
+
+    #Convert posts to JSON
+    data = json.dumps([post.as_dictionary() for post in posts])
     return Response(data, 200, mimetype="application/json")
