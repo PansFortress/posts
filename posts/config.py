@@ -3,5 +3,5 @@ class DevelopmentConfig(object):
     DEBUG = True
 
 class TestingConfig(object):
-    DATABASE_URI = "postgresql://localhost:5432/posts-test"
+    DATABASE_URI = "postgresql:///posts-test"
     DEBUG = True

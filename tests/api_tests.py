@@ -61,6 +61,32 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(postB["title"], "Example Post B")
         self.assertEqual(postB["body"], "Just another body")
 
+    def test_get_post(self):
+        postA = models.Post(title="Example Post A", body="This is some example")
+        postB = models.Post(title="Example Post B", body="This is another example")
+
+        session.add_all([postA, postB])
+        session.commit()
+
+        response = self.client.get("/api/posts/{}".format(postB.id))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "application/json")
+
+        post = json.loads(response.data.decode("ascii"))
+        self.assertEqual(post["title"], "Example Post B")
+        self.assertEqual(post["body"], "This is another example")
+
+    def test_get_non_existent_post(self):
+        """Getting a single post which doesn't exist"""
+        response = self.client.get("/api/posts/1")
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.mimetype, "application/json")
+
+        data = json.loads(response.data.decode("ascii"))
+        self.assertEqual(data["message"], "Could not find  post with id 1")
+
 
 if __name__ == "__main__":
     unittest.main()
