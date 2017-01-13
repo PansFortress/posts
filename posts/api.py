@@ -16,3 +16,16 @@ def posts_get():
     #Convert posts to JSON
     data = json.dumps([post.as_dictionary() for post in posts])
     return Response(data, 200, mimetype="application/json")
+
+@app.route("/api/posts/<int:id>", methods=["GET"])
+def post_get(id):
+    """Get a single post"""
+    post = session.query(models.Post).get(id)
+
+    if not post:
+        message = "Could not find post with id {}".format(id)
+        data = json.dumps({"message": message})
+        return Response(data, 404, mimetype="application/json")
+
+    data = json.dumps(post.as_dictionary())
+    return Response(data, 200, mimetype="application/json")

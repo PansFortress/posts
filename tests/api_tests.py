@@ -85,7 +85,7 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(response.mimetype, "application/json")
 
         data = json.loads(response.data.decode("ascii"))
-        self.assertEqual(data["message"], "Could not find  post with id 1")
+        self.assertEqual(data["message"], "Could not find post with id 1")
 
 
 if __name__ == "__main__":
