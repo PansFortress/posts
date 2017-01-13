@@ -9,6 +9,7 @@ from posts import app
 from .database import session
 
 @app.route("/api/posts", methods=["GET"])
+@decorators.accept("application/json")
 def posts_get():
     """Get a list of posts"""
     posts = session.query(models.Post).order_by(models.Post.id)
@@ -17,6 +18,7 @@ def posts_get():
     data = json.dumps([post.as_dictionary() for post in posts])
     return Response(data, 200, mimetype="application/json")
 
+@decorators.accept("application/json")
 @app.route("/api/posts/<int:id>", methods=["GET"])
 def post_get(id):
     """Get a single post"""
