@@ -31,3 +31,17 @@ def post_get(id):
 
     data = json.dumps(post.as_dictionary())
     return Response(data, 200, mimetype="application/json")
+
+@app.route("/api/posts/<int:id>", methods=["DELETE"])
+def post_delete(id):
+    """Delete a single post"""
+    post = session.query(models.Post).get(id)
+    session.delete(post)
+    session.commit()
+
+    message = "{} has been deleted successfully".format(id)
+    data = json.dumps({"message": message})
+
+    return Response(data, 200, mimetype="application/json")
+
+# TODO Update to include PUT to add an entry

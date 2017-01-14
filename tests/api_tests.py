@@ -33,6 +33,7 @@ class TestAPI(unittest.TestCase):
         postB = models.Post(title = "Example Post B", body = "Just another body")
         session.add_all([postA, postB])
         session.commit()
+        return postA.id, postB.id
 
     def test_get_empty_posts(self):
         response = self.client.get("/api/posts", 
@@ -64,13 +65,9 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(postB["body"], "Just another body")
 
     def test_get_post(self):
-        postA = models.Post(title="Example Post A", body="This is some example")
-        postB = models.Post(title="Example Post B", body="This is another example")
+        post_a_id, post_b_id = self.create_posts()
 
-        session.add_all([postA, postB])
-        session.commit()
-
-        response = self.client.get("/api/posts/{}".format(postB.id),
+        response = self.client.get("/api/posts/{}".format(post_b_id),
             headers=[("Accept", "application/json")])
 
         self.assertEqual(response.status_code, 200)
@@ -78,7 +75,7 @@ class TestAPI(unittest.TestCase):
 
         post = json.loads(response.data.decode("ascii"))
         self.assertEqual(post["title"], "Example Post B")
-        self.assertEqual(post["body"], "This is another example")
+        self.assertEqual(post["body"], "Just another body")
 
     def test_get_non_existent_post(self):
         """Getting a single post which doesn't exist"""
@@ -101,6 +98,17 @@ class TestAPI(unittest.TestCase):
         data = json.loads(response.data.decode("ascii"))
         self.assertEqual(data["message"],
                          "Request must accept application/json data")
+
+    def test_delete_post(self):
+        post_a_id, post_b_id = self.create_posts()
+        response = self.client.delete("/api/posts/{}".format(post_b_id),
+            headers=[("Accept","application/xml")])
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "application/json")
+        data = json.loads(response.data.decode("ascii"))
+        self.assertEqual(data["message"], 
+                         "{} has been deleted successfully".format(post_b_id))
 
 
 if __name__ == "__main__":
