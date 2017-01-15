@@ -31,9 +31,10 @@ class TestAPI(unittest.TestCase):
         """Getting posts from a populated database"""
         postA = models.Post(title = "Example Post A", body = "Just the body")
         postB = models.Post(title = "Example Post B", body = "Just another body")
-        session.add_all([postA, postB])
+        postC = models.Post(title = "Example whistles C", body = "Post with whistles")
+        session.add_all([postA, postB, postC])
         session.commit()
-        return postA.id, postB.id
+        return postA.id, postB.id, postC.id
 
     def test_get_empty_posts(self):
         response = self.client.get("/api/posts", 
@@ -54,7 +55,7 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(response.mimetype, "application/json")
 
         data = json.loads(response.data.decode("ascii"))
-        self.assertEqual(len(data), 2)
+        self.assertEqual(len(data), 3)
 
         postA = data[0]
         self.assertEqual(postA["title"], "Example Post A")
@@ -65,7 +66,7 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(postB["body"], "Just another body")
 
     def test_get_post(self):
-        post_a_id, post_b_id = self.create_posts()
+        post_a_id, post_b_id, post_c_id = self.create_posts()
 
         response = self.client.get("/api/posts/{}".format(post_b_id),
             headers=[("Accept", "application/json")])
@@ -100,15 +101,28 @@ class TestAPI(unittest.TestCase):
                          "Request must accept application/json data")
 
     def test_delete_post(self):
-        post_a_id, post_b_id = self.create_posts()
+        post_a_id, post_b_id, post_c_id = self.create_posts()
         response = self.client.delete("/api/posts/{}".format(post_b_id),
-            headers=[("Accept","application/xml")])
+            headers=[("Accept","application/json")])
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.mimetype, "application/json")
         data = json.loads(response.data.decode("ascii"))
         self.assertEqual(data["message"], 
                          "{} has been deleted successfully".format(post_b_id))
+
+    def test_get_post_with_titles(self):
+        post_a_id, post_b_id, post_c_id = self.create_posts()
+        response = self.client.get("/api/posts?title_like=whistles",
+            headers=[("Accept", "application/json")])
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "application/json")
+        posts = json.loads(response.data.decode("ascii"))
+        self.assertEqual(len(posts), 1)
+
+        post = posts[0]
+        self.assertEqual(post["title"], "Example whistles C")
 
 
 if __name__ == "__main__":
