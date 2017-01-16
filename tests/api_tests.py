@@ -31,7 +31,7 @@ class TestAPI(unittest.TestCase):
         """Getting posts from a populated database"""
         postA = models.Post(title = "Example Post A", body = "Just the body")
         postB = models.Post(title = "Example Post B", body = "Just another body")
-        postC = models.Post(title = "Example whistles C", body = "Post with whistles")
+        postC = models.Post(title = "Example whistles C", body = "Post with whiskers")
         session.add_all([postA, postB, postC])
         session.commit()
         return postA.id, postB.id, postC.id
@@ -123,6 +123,36 @@ class TestAPI(unittest.TestCase):
 
         post = posts[0]
         self.assertEqual(post["title"], "Example whistles C")
+
+    def test_get_post_with_body(self):
+        post_a_id, post_b_id, post_c_id = self.create_posts()
+        response = self.client.get("/api/posts?body_like=whiskers",
+            headers=[("Accept", "application/json")])
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "application/json")
+        posts = json.loads(response.data.decode("ascii"))
+        self.assertEqual(len(posts),1)
+
+        post = posts[0]
+        self.assertEqual(post["body"], "Post with whiskers")
+
+    def test_get_post_with_body_and_title(self):
+        post_a_id, post_b_id, post_c_id = self.create_posts()
+        response = self.client.get("/api/posts?body_like=body&title_like=Post",
+            headers=[("Accept", "application/json")])
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "application/json")
+        posts = json.loads(response.data.decode("ascii"))
+        self.assertEqual(len(posts),2)
+
+        postA = posts[0]
+        self.assertEqual(postA["title"], "Example Post A")
+
+        postB = posts[1]
+        self.assertEqual(postB["title"], "Example Post B")
+
 
 
 if __name__ == "__main__":

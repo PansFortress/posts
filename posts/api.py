@@ -14,10 +14,15 @@ def posts_get():
     """Get a list of posts"""
     
     title_like = request.args.get("title_like")
+    body_like = request.args.get("body_like")
 
     posts = session.query(models.Post)
-    if title_like:
+    if title_like and body_like:
+        posts = posts.filter(models.Post.title.contains(title_like)).filter(models.Post.body.contains(body_like))
+    elif title_like:
         posts = posts.filter(models.Post.title.contains(title_like))
+    elif body_like:
+        posts = posts.filter(models.Post.body.contains(body_like))
     posts = posts.order_by(models.Post.id)
 
     #Convert posts to JSON
