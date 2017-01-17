@@ -29,6 +29,22 @@ def posts_get():
     data = json.dumps([post.as_dictionary() for post in posts])
     return Response(data, 200, mimetype="application/json")
 
+@app.route("/api/posts", methods=["POST"])
+@decorators.accept("application/json")
+def posts_post():
+    """Accepts and adds a post to the database"""
+    data = request.json
+
+    post = models.Post(title=data["title"], body=data["body"])
+    session.add(post)
+    session.commit()
+
+    # Return a 201 Created, containing the post as JSON and with the
+    # Location header set to the location of the past
+    data = json.dumps(post.as_dictionary())
+    headers = {"Location": url_for("post_get", id=post.id)}
+    return Response(data, 201, headers=headers, mimetype="application/json")
+
 @decorators.accept("application/json")
 @app.route("/api/posts/<int:id>", methods=["GET"])
 def post_get(id):
