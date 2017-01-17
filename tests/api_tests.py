@@ -196,5 +196,38 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(data["message"],
                          "Request must contain application/json data")
 
+    def test_invalid_data(self):
+        data = {
+            "title": "Example title",
+            "body": 32
+        }
+
+        response = self.client.post("/api/posts",
+            data=json.dumps(data),
+            content_type="application/json",
+            headers=[("Accept", "application/json")]
+            )
+
+        self.assertEqual(response.status_code, 422)
+
+        data = json.loads(response.data.decode("ascii"))
+        self.assertEqual(data["message"], "32 is not of type 'string'")
+
+    def test_missing_data(self):
+        data = {
+            "title": "Example title"
+        }
+
+        response = self.client.post("/api/posts",
+            data=json.dumps(data),
+            content_type="application/json",
+            headers=[("Accept", "application/json")]
+            )
+
+        self.assertEqual(response.status_code, 422)
+
+        data = json.loads(response.data.decode("ascii"))
+        self.assertEqual(data["message"], "'body' is a required property")
+
 if __name__ == "__main__":
     unittest.main()

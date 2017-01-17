@@ -8,6 +8,14 @@ from . import decorators
 from posts import app
 from .database import session
 
+post_schema = {
+    "properties":{
+        "title": {"type": "string"},
+        "body": {"type": "string"}
+    },
+    "required": ["title", "body"]
+}
+
 @app.route("/api/posts", methods=["GET"])
 @decorators.accept("application/json")
 def posts_get():
@@ -34,6 +42,12 @@ def posts_get():
 def posts_post():
     """Accepts and adds a post to the database"""
     data = request.json
+    
+    try:
+        validate(data, post_schema)
+    except ValidationError as error:
+        data = {"message": error.message}
+        return Response(json.dumps(data), 422, mimetype="application/json")
 
     post = models.Post(title=data["title"], body=data["body"])
     session.add(post)
