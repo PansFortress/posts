@@ -30,7 +30,7 @@ def posts_get():
     return Response(data, 200, mimetype="application/json")
 
 @app.route("/api/posts", methods=["POST"])
-@decorators.accept("application/json")
+@decorators.require("application/json")
 def posts_post():
     """Accepts and adds a post to the database"""
     data = request.json
