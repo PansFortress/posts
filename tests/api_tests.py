@@ -153,7 +153,33 @@ class TestAPI(unittest.TestCase):
         postB = posts[1]
         self.assertEqual(postB["title"], "Example Post B")
 
+    def test_post_request(self):
+        data = {
+            "title": "Example post",
+            "body": "Testing the body of an example post"
+        }
 
+        response = self.client.post("/api/posts",
+            data=json.dumps(data),
+            content_type="application/json",
+            headers=[("Accept", "application/json")])
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.mimetype, "application/json")
+        self.assertEqual(urlparse(response.headers.get("Location")).path,
+                         "/api/posts/1")
+
+        data = json.loads(response.data.decode("ascii"))
+        self.assertEqual(data["id"], 1)
+        self.assertEqual(data["title"], "Example post")
+        self.assertEqual(data["body"], "Testing the body of an example post")
+
+        posts = session.query(models.Post).all()
+        self.assertEqual(len(posts),1)
+
+        post = posts[0]
+        self.assertEqual(post.title, "Example post")
+        self.assertEqual(post.body, "Testing the body of an example post")
 
 if __name__ == "__main__":
     unittest.main()
