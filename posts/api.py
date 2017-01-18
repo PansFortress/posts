@@ -87,8 +87,29 @@ def post_delete(id):
 
 @app.route("/api/posts/<int:id>", methods=["PUT"])
 def post_put(id):
-    post = session.query(models.Post).get(id)
-    if not post:
-        # TODO: PUT: If this post does not exist, 
-        # add the post after validating the data
-        # ELSE if this post does exist, update the post
+    data = request.json
+
+    try:
+        validate(data, post_schema)
+        post = session.query(models.Post).get(id)
+        if not post:
+            new_post = models.Post(title=data["title"], body=data["body"])
+            session.add(new_post)
+            session.commit()
+            
+            message = "New post has been added with Title: {}".format(data["title"])
+            data = json.dumps({"message": message})
+
+            return Response(data, 202, mimetype="application/json")
+        else:
+            post.title = data["title"]
+            post.body = data["body"]
+            session.commit()
+            message = "Post has been updated"
+            data = json.dumps({"message": message})
+            return Response(data, 202, mimetype="application/json")
+
+
+    except ValidationError as error:
+        data = {"message": error.message}
+        return Response(json.dumps(data), 422, mimetype="application/json")

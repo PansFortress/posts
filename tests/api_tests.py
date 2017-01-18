@@ -244,7 +244,8 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 202)
 
         data = json.loads(response.data.decode("ascii"))
-        self.assertEqual(data["message"], "Accepted")
+        self.assertEqual(data["message"], 
+            "New post has been added with Title: New Title for Put")
 
         posts = session.query(models.Post).all()
         self.assertEqual(len(posts),1)
@@ -259,6 +260,7 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(len(posts),3)
 
         post = posts[0]
+
         self.assertEqual(post.title, "Example Post A")
         self.assertEqual(post.body, "Just the body")
 
@@ -274,13 +276,13 @@ class TestAPI(unittest.TestCase):
         )
 
         self.assertEqual(response.status_code, 202)
-        json_data == json.loads(response.data.decode("ascii"))
-        self.assertEqual(json_data["message"], "Accepted and Updated")
+        json_data = json.loads(response.data.decode("ascii"))
+        self.assertEqual(json_data["message"], "Post has been updated")
 
-        posts = session.query(models.Post).first()
-        self.assertEqual(len(posts),1)
-
+        posts = session.query(models.Post).order_by(models.Post.id).all()
+        self.assertEqual(len(posts),3)
         post = posts[0]
+
         self.assertEqual(post.title, "Some New Title for Post A")
         self.assertEqual(post.body, "Some New Body for Post A's Body")
 
