@@ -42,7 +42,7 @@ def posts_get():
 def posts_post():
     """Accepts and adds a post to the database"""
     data = request.json
-    
+
     try:
         validate(data, post_schema)
     except ValidationError as error:
@@ -85,4 +85,10 @@ def post_delete(id):
 
     return Response(data, 200, mimetype="application/json")
 
-# TODO Update to include PUT to add an entry
+@app.route("/api/posts/<int:id>", methods=["PUT"])
+def post_put(id):
+    post = session.query(models.Post).get(id)
+    if not post:
+        # TODO: PUT: If this post does not exist, 
+        # add the post after validating the data
+        # ELSE if this post does exist, update the post
