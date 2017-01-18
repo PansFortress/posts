@@ -229,5 +229,60 @@ class TestAPI(unittest.TestCase):
         data = json.loads(response.data.decode("ascii"))
         self.assertEqual(data["message"], "'body' is a required property")
 
+    def test_put_new_data(self):
+        data = {
+            "title": "New Title for Put",
+            "body": "Body for new post"
+        }
+
+        response = self.client.put("/api/posts/1",
+            data=json.dumps(data),
+            content_type="application/json",
+            headers=[("Accept", "application/json")]
+        )
+
+        self.assertEqual(response.status_code, 202)
+
+        data = json.loads(response.data.decode("ascii"))
+        self.assertEqual(data["message"], "Accepted")
+
+        posts = session.query(models.Post).all()
+        self.assertEqual(len(posts),1)
+
+        post = posts[0]
+        self.assertEqual(post.title, "New Title for Put")
+        self.assertEqual(post.body, "Body for new post")
+
+    def test_put_updating_data(self):
+        self.create_posts()
+        posts = session.query(models.Post).all()
+        self.assertEqual(len(posts),3)
+
+        post = posts[0]
+        self.assertEqual(post.title, "Example Post A")
+        self.assertEqual(post.body, "Just the body")
+
+        data = {
+            "title": "Some New Title for Post A",
+            "body": "Some New Body for Post A's Body"
+        }
+
+        response = self.client.put("/api/posts/1",
+            data=json.dumps(data),
+            content_type="application/json",
+            headers=[("Accept", "application/json")]
+        )
+
+        self.assertEqual(response.status_code, 202)
+        json_data == json.loads(response.data.decode("ascii"))
+        self.assertEqual(json_data["message"], "Accepted and Updated")
+
+        posts = session.query(models.Post).first()
+        self.assertEqual(len(posts),1)
+
+        post = posts[0]
+        self.assertEqual(post.title, "Some New Title for Post A")
+        self.assertEqual(post.body, "Some New Body for Post A's Body")
+
 if __name__ == "__main__":
     unittest.main()
