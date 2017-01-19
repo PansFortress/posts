@@ -241,7 +241,7 @@ class TestAPI(unittest.TestCase):
             headers=[("Accept", "application/json")]
         )
 
-        self.assertEqual(response.status_code, 202)
+        self.assertEqual(response.status_code, 201)
 
         data = json.loads(response.data.decode("ascii"))
         self.assertEqual(data["message"], 
@@ -275,7 +275,7 @@ class TestAPI(unittest.TestCase):
             headers=[("Accept", "application/json")]
         )
 
-        self.assertEqual(response.status_code, 202)
+        self.assertEqual(response.status_code, 200)
         json_data = json.loads(response.data.decode("ascii"))
         self.assertEqual(json_data["message"], "Post has been updated")
 

@@ -25,11 +25,9 @@ def posts_get():
     body_like = request.args.get("body_like")
 
     posts = session.query(models.Post)
-    if title_like and body_like:
-        posts = posts.filter(models.Post.title.contains(title_like)).filter(models.Post.body.contains(body_like))
-    elif title_like:
+    if title_like:
         posts = posts.filter(models.Post.title.contains(title_like))
-    elif body_like:
+    if body_like:
         posts = posts.filter(models.Post.body.contains(body_like))
     posts = posts.order_by(models.Post.id)
 
@@ -93,21 +91,21 @@ def post_put(id):
         validate(data, post_schema)
         post = session.query(models.Post).get(id)
         if not post:
-            new_post = models.Post(title=data["title"], body=data["body"])
+            new_post = models.Post(title=data["title"], body=data["body"], id=id)
             session.add(new_post)
             session.commit()
             
             message = "New post has been added with Title: {}".format(data["title"])
             data = json.dumps({"message": message})
 
-            return Response(data, 202, mimetype="application/json")
+            return Response(data, 201, mimetype="application/json")
         else:
             post.title = data["title"]
             post.body = data["body"]
             session.commit()
             message = "Post has been updated"
             data = json.dumps({"message": message})
-            return Response(data, 202, mimetype="application/json")
+            return Response(data, 200, mimetype="application/json")
 
 
     except ValidationError as error:
